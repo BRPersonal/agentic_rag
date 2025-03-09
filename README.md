@@ -31,6 +31,13 @@ Captured the installed packages back in requirements.txt
 
 $ pip freeze > requirements.txt 
 
+Study Notes
+-----------
+#1. Create set of nodes from document
+#2. Create an Index from set of nodes
+#3. Create a Query Engine using an Index. Query Engine composes a llm
+#4. Create a Query Engine Tool from a Query Engine
+#5. A router Query Engine Tool takes a selctor and an array of Query Engine Tools to delegate
 
 
 

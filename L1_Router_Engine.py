@@ -1,6 +1,6 @@
 import nest_asyncio
-from dotenv import load_dotenv
-import utils as utils
+import utils.utils as utils
+from utils.AppConfig import AppConfig
 
 
 def show_output(question,response):
@@ -10,7 +10,8 @@ def show_output(question,response):
     print("-" * 50)
 
 if __name__ == "__main__":
-    load_dotenv(override=True)
+
+    _ = AppConfig()  #we just have to load the env
     nest_asyncio.apply()
     query_engine = utils.get_router_query_engine("metagpt.pdf")
 

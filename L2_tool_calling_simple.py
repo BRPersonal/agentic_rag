@@ -1,7 +1,8 @@
 import nest_asyncio
 from llama_index.core.tools import FunctionTool
-from dotenv import load_dotenv
 from llama_index.llms.openai import OpenAI
+
+from utils.AppConfig import AppConfig
 
 
 def add(x:int,y:int) -> int:
@@ -13,13 +14,13 @@ def mystery(x:int, y:int) -> int:
     return  (x+y) * (x+y)
 
 if __name__ == "__main__":
-    load_dotenv(override=True)
+    config = AppConfig()
     nest_asyncio.apply()
 
     add_tool = FunctionTool.from_defaults(fn=add)
     mystery_tool = FunctionTool.from_defaults(fn=mystery)
 
-    llm = OpenAI(model="gpt-3.5-turbo")
+    llm = OpenAI(model=config.get_open_ai_model())
     response = llm.predict_and_call(
         [
             add_tool,
