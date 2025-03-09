@@ -9,7 +9,7 @@ from llama_index.llms.openai import OpenAI
 from typing import List
 from llama_index.core.vector_stores import FilterCondition, MetadataFilters
 
-from AppConfig import AppConfig
+from utils.AppConfig import AppConfig
 
 config = AppConfig()
 
@@ -23,6 +23,25 @@ def _create_nodes(file_path: str):
     splitter = SentenceSplitter(chunk_size=1024)
     return splitter.get_nodes_from_documents(documents)
 
+def get_summary_tool(file_path,llm):
+
+    nodes = _create_nodes(file_path)
+    summary_index = SummaryIndex(nodes)
+
+    summary_query_engine = summary_index.as_query_engine(
+        response_mode="tree_summarize",
+        use_async=True,
+        llm=llm
+    )
+
+    return QueryEngineTool.from_defaults(
+        name="summary_tool",
+        query_engine=summary_query_engine,
+        description=(
+            "Useful if you want to get a summary of MetaGPT"
+        )
+    )
+
 
 def get_router_query_engine(file_path: str, llm = None, embed_model = None):
 
@@ -32,22 +51,12 @@ def get_router_query_engine(file_path: str, llm = None, embed_model = None):
     embed_model = embed_model or OpenAIEmbedding(model=config.get_open_ai_embedding_model())
 
     nodes = _create_nodes(file_path)
-    summary_index = SummaryIndex(nodes)
+
     vector_index = VectorStoreIndex(nodes, embed_model=embed_model)
     
-    summary_query_engine = summary_index.as_query_engine(
-        response_mode="tree_summarize",
-        use_async=True,
-        llm=llm
-    )
     vector_query_engine = vector_index.as_query_engine(llm=llm)
     
-    summary_tool = QueryEngineTool.from_defaults(
-        query_engine=summary_query_engine,
-        description=(
-            "Useful for summarization questions related to MetaGPT"
-        ),
-    )
+    summary_tool = get_summary_tool(file_path,llm)
     
     vector_tool = QueryEngineTool.from_defaults(
         query_engine=vector_query_engine,
@@ -89,8 +98,8 @@ def get_vector_query_response(file_path:str,query:str, page_numbers: List[str]):
                             )
     )
 
-    response = query_engine.query(query)
-    return response
+    result = query_engine.query(query)
+    return result
 
 if __name__ == "__main__":
     response = get_vector_query_response("metagpt.pdf",
